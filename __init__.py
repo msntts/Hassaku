@@ -1,1 +1,1 @@
-from hassaku import Hassaku
+from .hassaku import Hassaku

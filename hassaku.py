@@ -1,11 +1,11 @@
 from tempfile import TemporaryDirectory
-from platforms.platform_util import PlatformUtil
 from os import getcwd
 from os.path import join, isdir
 from glob import glob
 from re import search
 from cv2 import imread, matchTemplate, TM_CCOEFF_NORMED
 from numpy import where
+from .platforms.platform_util import PlatformUtil
 
 
 class Hassaku:
@@ -79,20 +79,23 @@ class Hassaku:
             for finding_img_path in self.__get_finding_images_path(img_name):
                 finding_img = imread(finding_img_path)
 
-                matches = matchTemplate(capture_img, finding_img, TM_CCOEFF_NORMED)
+                try:
+                    matches = matchTemplate(capture_img, finding_img, TM_CCOEFF_NORMED)
 
-                for (y, x) in zip(*where(matches >= threshold)):
-                    (h, w, _) = finding_img.shape
-                    rects.append((x, y, x + w, y + h))
+                    for (y, x) in zip(*where(matches >= threshold)):
+                        (h, w, _) = finding_img.shape
+                        rects.append((x, y, x + w, y + h))
+                except:
+                    # 画面キャプチャより検索画像のサイズが大きいと例外が飛ぶので握りつぶす
+                    pass
 
-                return rects
+            return rects
         else:
             return []
 
     def __get_finding_images_path(self, img_name: str) -> list:
         # resource直下にあるファイルの場合
         for path in glob(join(self.__res_dr, "**"), recursive=False):
-            print(path)
             if not isdir(path) and search(img_name + self.__ALLOW_IMG_EXT_PTTN, path):
                 # 1つしか見つからないはず
                 return [path]
