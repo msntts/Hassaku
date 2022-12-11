@@ -1,0 +1,1 @@
+from hassaku import Hassaku
